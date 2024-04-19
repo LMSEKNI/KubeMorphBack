@@ -1,6 +1,7 @@
 package com.example.Controllers.PodManip;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,13 +48,12 @@ public class PodManipController {
     }
 
     @GetMapping("/listAll")
-    public String listPodsInAllNamespaces() {
+    public List<String> listPodsInAllNamespaces() {
         try {
-            podManipService.listPodsInAllNamespaces();
-            return "Listed pods in all namespaces.";
+            return podManipService.listPodsInAllNamespaces();
         } catch (IOException | ApiException e) {
             e.printStackTrace();
-            return "Failed to list pods in all namespaces.";
+            return null; 
         }
     }
 }
