@@ -15,52 +15,66 @@ import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
 
 public class CreatePodYaml {
- 
-    //can be used to create a pod from the form
-    public static void main(String[] args) throws IOException, ApiException, ClassNotFoundException {
-        V1Pod pod =
-            new V1PodBuilder()
-                .withNewMetadata()
-                .withName("apod")
-                .endMetadata()
-                .withNewSpec()
-                .addNewContainer()
-                .withName("www")
-                .withImage("nginx")
-                .withNewResources()
-                .withLimits(new HashMap<>())
-                .endResources()
-                .endContainer()
-                .endSpec()
-                .build();
+
+    public static void main(String[] args) throws IOException, ApiException {
+        CreatePodYaml createPodYaml = new CreatePodYaml();
+        createPodYaml.createAndDeployPodFromConfig();
+    }
+
+    // Method to create a pod from the provided parameters
+    private V1Pod createPod(String namespace, String containerName, String image) {
+        return new V1PodBuilder()
+            .withNewMetadata()
+            .withName(namespace)
+            .endMetadata()
+            .withNewSpec()
+            .addNewContainer()
+            .withName(containerName)
+            .withImage(image)
+            .withNewResources()
+            .withLimits(new HashMap<>())
+            .endResources()
+            .endContainer()
+            .endSpec()
+            .build();
+    }
+
+    // Method to read a pod configuration from a YAML file
+    private V1Pod readPodFromYaml(String filePath) throws IOException {
+        File file = new File(filePath);
+        return (V1Pod) Yaml.load(file);
+    }
+
+    // Method to deploy a pod from a YAML configuration file
+    private V1Pod deployPodFromYaml(V1Pod pod) throws ApiException {
+        CoreV1Api api = new CoreV1Api();
+        return api.createNamespacedPod("default", pod, null, null, null, null);
+    }
+
+    // Method to delete a pod
+    private V1Pod deletePod(String podName) throws ApiException {
+        CoreV1Api api = new CoreV1Api();
+        return api.deleteNamespacedPod(podName, "default", null, null, null, null, null, new V1DeleteOptions());
+    }
+
+    // Method to encapsulate the whole process of creating and deploying a pod from configuration
+    public void createAndDeployPodFromConfig() throws IOException, ApiException {
+        String namespace = "apod";
+        String containerName = "www";
+        String image = "nginx";
+
+        // Create a pod from parameters
+        V1Pod pod = createPod(namespace, containerName, image);
         System.out.println(Yaml.dump(pod));
-    
-        // Read yaml configuration file, and deploy it
+
+        // Deploy the pod from a YAML configuration file
         ApiClient client = Config.defaultClient();
         Configuration.setDefaultApiClient(client);
-    
-        // Example yaml file 
-        File file = new File("test.yaml");
-        V1Pod yamlpod = (V1Pod) Yaml.load(file);
-    
-        // Deployment and StatefulSet is defined in apps/v1, so you should use AppsV1Api instead of
-        // create the pod from a yaml file
-        CoreV1Api api = new CoreV1Api();
-        V1Pod createResult = api.createNamespacedPod("default", yamlpod, null, null, null, null);
-        System.out.println(createResult);
-    
-        //Delete the created testing pod 
-         V1Pod deleteResult =
-            api.deleteNamespacedPod(
-                yamlpod.getMetadata().getName(),
-                "default",
-                null,
-                null,
-                null,
-                null,
-                null,
-                new V1DeleteOptions());
-        System.out.println(deleteResult);
-      } 
-    
+        V1Pod deployedPod = deployPodFromYaml(pod);
+        System.out.println(deployedPod);
+
+        // Delete the deployed pod
+        V1Pod deletedPod = deletePod(deployedPod.getMetadata().getName());
+        System.out.println(deletedPod);
+    }
 }
