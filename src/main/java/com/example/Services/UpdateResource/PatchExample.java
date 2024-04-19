@@ -1,4 +1,4 @@
-package com.example.UpdateResource;
+package com.example.Services.UpdateResource;
 
 import java.io.IOException;
 

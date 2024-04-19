@@ -3,7 +3,7 @@
 // deletion, modification) in Kubernetes namespaces. It sets up a watch on namespaces and prints out the
 // type of event (ADDED, MODIFIED, DELETED, etc.) along with the name of the namespace involved.
 
-package com.example.WatchNamespaces;
+package com.example.Services.WatchNamespaces;
 
 import java.io.IOException;
 

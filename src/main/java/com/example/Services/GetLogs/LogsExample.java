@@ -1,4 +1,4 @@
-package com.example.GetLogs;
+package com.example.Services.GetLogs;
 
 import java.io.IOException;
 import java.io.InputStream;
